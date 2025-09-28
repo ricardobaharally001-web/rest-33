@@ -1,6 +1,7 @@
 "use client";
 import { useCart } from "@/lib/cart-store";
 import { getSettings } from "@/lib/supabase";
+import React from "react";
 
 function money(cents: number) { return `$${(cents/100).toFixed(2)}`; }
 
