@@ -10,6 +10,7 @@ export default function CartPage() {
   const { items, updateQty, remove, subtotal, clear } = useCart();
   const sub = subtotal();
   const [settings, setSettings] = React.useState<any>({});
+  const [customerName, setCustomerName] = React.useState("");
 
   React.useEffect(() => { getSettings().then(setSettings); }, []);
 
@@ -17,10 +18,11 @@ export default function CartPage() {
     const lines = items.map(i => `• ${i.name} × ${i.qty} — ${money(i.price_cents * i.qty)}`);
     const message = [
       `🛒 Order for ${settings?.business_name || "cook-shop"}`,
+      `From: ${customerName || "Customer"}`,
       `━━━━━━━━━━━━━━━`,
       ...lines,
       `━━━━━━━━━━━━━━━`,
-      `💰 Subtotal: ${money(sub)}`,
+      `💰 Total: ${money(sub)}`,
       "",
       `📍 Delivery Address: (please provide)`,
       `💳 Payment: Cash on delivery`,
@@ -29,6 +31,9 @@ export default function CartPage() {
     const phone = (settings?.whatsapp_number || "").replace(/[^\d]/g, "");
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
+    
+    // Clear cart after successful checkout
+    clear();
   };
 
   if (!items.length) {
@@ -97,6 +102,16 @@ export default function CartPage() {
         <div className="lg:col-span-1">
           <div className="card p-6">
             <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
+            
+            <div className="mb-4">
+              <label className="label text-xs mb-1">CUSTOMER NAME</label>
+              <input 
+                className="input" 
+                placeholder="Your name" 
+                value={customerName} 
+                onChange={e => setCustomerName(e.target.value)} 
+              />
+            </div>
             
             <div className="mb-4 space-y-2">
               <div className="flex justify-between text-sm">

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ImageUpload";
 import { Edit2, Trash2, Save, X, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import AdminLayout from "@/components/AdminLayout";
 
 export default function ProductsPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -154,7 +155,8 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <AdminLayout>
+      <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Link href="/admin" className="btn btn-ghost">
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -297,6 +299,7 @@ export default function ProductsPage() {
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </AdminLayout>
   );
 }

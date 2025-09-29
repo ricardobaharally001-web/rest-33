@@ -146,22 +146,21 @@ insert into public.site_settings (key, value) values
   ('logo_url', '"https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=100"')
 on conflict (key) do nothing;
 
--- 10. Storage policies (run after creating buckets)
--- Note: Create buckets first in Supabase Storage UI, then run these
+-- 10. Storage buckets and policies
+-- NOTE: You need to create storage buckets manually in Supabase Dashboard first:
+-- 1. Go to Storage in your Supabase dashboard
+-- 2. Create two buckets: "product-images" and "brand-assets"
+-- 3. Make both buckets PUBLIC
+-- 4. Then run these storage policies:
+
 -- For product-images bucket (allow public access for demo)
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-VALUES 
-  ('Public Access product-images', 'product-images', 'SELECT', 'true'::jsonb),
-  ('Public can upload product-images', 'product-images', 'INSERT', 'true'::jsonb),
-  ('Public can update product-images', 'product-images', 'UPDATE', 'true'::jsonb),
-  ('Public can delete product-images', 'product-images', 'DELETE', 'true'::jsonb)
-ON CONFLICT (name, bucket_id) DO NOTHING;
+CREATE POLICY "Public Access product-images" ON storage.objects FOR SELECT USING (bucket_id = 'product-images');
+CREATE POLICY "Public can upload product-images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'product-images');
+CREATE POLICY "Public can update product-images" ON storage.objects FOR UPDATE USING (bucket_id = 'product-images');
+CREATE POLICY "Public can delete product-images" ON storage.objects FOR DELETE USING (bucket_id = 'product-images');
 
 -- For brand-assets bucket (allow public access for demo)
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-VALUES
-  ('Public Access brand-assets', 'brand-assets', 'SELECT', 'true'::jsonb),
-  ('Public can upload brand-assets', 'brand-assets', 'INSERT', 'true'::jsonb),
-  ('Public can update brand-assets', 'brand-assets', 'UPDATE', 'true'::jsonb),
-  ('Public can delete brand-assets', 'brand-assets', 'DELETE', 'true'::jsonb)
-ON CONFLICT (name, bucket_id) DO NOTHING;
+CREATE POLICY "Public Access brand-assets" ON storage.objects FOR SELECT USING (bucket_id = 'brand-assets');
+CREATE POLICY "Public can upload brand-assets" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'brand-assets');
+CREATE POLICY "Public can update brand-assets" ON storage.objects FOR UPDATE USING (bucket_id = 'brand-assets');
+CREATE POLICY "Public can delete brand-assets" ON storage.objects FOR DELETE USING (bucket_id = 'brand-assets');
