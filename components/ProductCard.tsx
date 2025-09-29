@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-store";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, Check } from "lucide-react";
 import { useState } from "react";
 
 export default function ProductCard({ product }: { product: any }) {
@@ -12,26 +12,34 @@ export default function ProductCard({ product }: { product: any }) {
   const handleAdd = () => {
     setIsAdding(true);
     add({ id: product.id, name: product.name, price_cents: product.price_cents, qty: 1 });
+    
+    // Show toast notification
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up';
+    toast.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Added to cart!`;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.remove();
+    }, 3000);
+    
     setTimeout(() => setIsAdding(false), 600);
   };
 
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all hover:shadow-2xl hover:-translate-y-1 dark:bg-gray-900">
-      {/* Badge */}
       {product.stock < 5 && product.stock > 0 && (
         <div className="absolute left-2 top-2 z-10 rounded-full bg-orange-500 px-2 py-1 text-xs font-bold text-white">
           Only {product.stock} left!
         </div>
       )}
       
-      {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
-        {product.image_url ? (
-          <Image 
+        {product.image_url && product.image_url !== '/placeholder.svg' ? (
+          <img 
             src={product.image_url} 
-            alt={product.name} 
-            fill 
-            className="object-cover transition-transform duration-300 group-hover:scale-110" 
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           />
         ) : (
           <div className="flex h-full items-center justify-center">
@@ -40,7 +48,6 @@ export default function ProductCard({ product }: { product: any }) {
         )}
       </div>
 
-      {/* Content */}
       <div className="p-4">
         <div className="mb-2 flex items-start justify-between">
           <h3 className="font-bold text-gray-900 dark:text-white">{product.name}</h3>
@@ -65,7 +72,7 @@ export default function ProductCard({ product }: { product: any }) {
           </div>
           
           <button 
-            className={`rounded-xl px-4 py-2 font-medium transition-all ${
+            className={`rounded-xl px-4 py-2 font-medium transition-all flex items-center gap-1 ${
               isAdding 
                 ? "bg-green-500 text-white" 
                 : product.stock === 0
@@ -75,7 +82,7 @@ export default function ProductCard({ product }: { product: any }) {
             onClick={handleAdd}
             disabled={product.stock === 0}
           >
-            {isAdding ? "✓" : product.stock === 0 ? "Sold Out" : "Add"}
+            {isAdding ? <><Check className="h-4 w-4" /> Added</> : product.stock === 0 ? "Sold Out" : "Add"}
           </button>
         </div>
       </div>
