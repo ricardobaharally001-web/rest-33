@@ -2,7 +2,8 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ImageUpload";
-import { Edit2, Trash2, Save, X } from "lucide-react";
+import { Edit2, Trash2, Save, X, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function CategoriesPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -15,10 +16,12 @@ export default function CategoriesPage() {
 
   const load = async () => {
     try {
-      const { data, error } = await supabase.from("categories").select("*").order("created_at", { ascending: true });
+      const { data, error } = await supabase
+        .from("categories")
+        .select("*")
+        .order("created_at", { ascending: true });
       if (error) {
         console.error("Error loading categories:", error);
-        alert("Error loading categories: " + error.message);
       } else {
         setRows(data || []);
       }
@@ -39,8 +42,8 @@ export default function CategoriesPage() {
     try {
       const { error } = await supabase.from("categories").insert({ 
         name, 
-        description, 
-        image_url 
+        description: description || null, 
+        image_url: image_url || null
       });
       
       if (error) {
@@ -64,8 +67,8 @@ export default function CategoriesPage() {
     setEditingId(row.id);
     setEditForm({
       name: row.name,
-      description: row.description,
-      image_url: row.image_url
+      description: row.description || "",
+      image_url: row.image_url || ""
     });
   };
 
@@ -74,7 +77,11 @@ export default function CategoriesPage() {
     try {
       const { error } = await supabase
         .from("categories")
-        .update(editForm)
+        .update({
+          name: editForm.name,
+          description: editForm.description || null,
+          image_url: editForm.image_url || null
+        })
         .eq("id", editingId);
       
       if (error) {
@@ -114,9 +121,14 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Manage Categories</h1>
+      <div className="flex items-center gap-4">
+        <Link href="/admin" className="btn btn-ghost">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Admin
+        </Link>
+        <h1 className="text-2xl font-bold">Manage Categories</h1>
+      </div>
       
-      {/* Add new category form */}
       <div className="card p-6 space-y-4">
         <h2 className="font-semibold">Add New Category</h2>
         <div className="grid gap-4 md:grid-cols-2">
@@ -148,12 +160,10 @@ export default function CategoriesPage() {
         </button>
       </div>
 
-      {/* Categories list */}
       <div className="space-y-2">
         {rows.map(r => (
           <div key={r.id} className="card p-4">
             {editingId === r.id ? (
-              // Edit mode
               <div className="space-y-3">
                 <div className="grid gap-2 md:grid-cols-2">
                   <input
@@ -192,10 +202,9 @@ export default function CategoriesPage() {
                 </div>
               </div>
             ) : (
-              // View mode
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {r.image_url && (
+                  {r.image_url && r.image_url !== '/placeholder.svg' && (
                     <img src={r.image_url} alt={r.name} className="h-12 w-12 rounded object-cover" />
                   )}
                   <div>
