@@ -17,18 +17,19 @@ export default function CartPage() {
   }, []);
 
   const checkout = () => {
+    if (!customerName.trim()) {
+      alert("Please enter your name to proceed with checkout");
+      return;
+    }
+
     const lines = items.map(i => `• ${i.name} × ${i.qty} — ${money(i.price_cents * i.qty)}`);
     const message = [
       `🛒 Order for ${settings?.business_name || "cook-shop"}`,
-      `From: ${customerName || "Customer"}`,
+      `From: ${customerName}`,
       `━━━━━━━━━━━━━━━`,
       ...lines,
       `━━━━━━━━━━━━━━━`,
-      `💰 Total: ${money(sub)}`,
-      "",
-      `📍 Delivery Address: (please provide)`,
-      `💳 Payment: Cash on delivery`,
-      `📞 Contact: (your number)`
+      `💰 Total: ${money(sub)}`
     ].join("\n");
     const phone = (settings?.whatsapp_number || "").replace(/[^\d]/g, "");
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
@@ -106,12 +107,13 @@ export default function CartPage() {
             <h2 className="mb-4 text-xl font-bold">Order Summary</h2>
             
             <div className="mb-4">
-              <label className="label text-xs mb-1">CUSTOMER NAME</label>
+              <label className="label text-xs mb-1">CUSTOMER NAME *</label>
               <input 
                 className="input" 
-                placeholder="Your name" 
+                placeholder="Enter your name" 
                 value={customerName} 
-                onChange={e => setCustomerName(e.target.value)} 
+                onChange={e => setCustomerName(e.target.value)}
+                required
               />
             </div>
             
@@ -131,7 +133,11 @@ export default function CartPage() {
               </div>
             </div>
             
-            <button className="btn btn-primary mb-2 w-full" onClick={checkout}>
+            <button 
+              className="btn btn-primary mb-2 w-full" 
+              onClick={checkout}
+              disabled={!customerName.trim()}
+            >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Checkout via WhatsApp
             </button>
