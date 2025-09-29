@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import Image from "next/image";
 
 interface ImageUploadProps {
   value: string;
@@ -19,16 +18,23 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
     setUploading(true);
     try {
-      // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
-      // Upload to Supabase Storage
       const { error: uploadError, data } = await supabase.storage
         .from(bucket)
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
@@ -36,7 +42,6 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
         return;
       }
 
-      // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(fileName);
@@ -59,7 +64,7 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
         <input
           type="url"
           className="input flex-1"
-          placeholder="Image URL"
+          placeholder="Image URL or upload file"
           value={value}
           onChange={(e) => {
             onChange(e.target.value);
@@ -71,7 +76,7 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
           <input
             type="file"
             className="hidden"
-            accept="image/*"
+            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
             onChange={uploadImage}
             disabled={uploading}
           />
@@ -84,12 +89,12 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
         </label>
       </div>
 
-      {preview && (
+      {preview && preview !== '/placeholder.svg' && (
         <div className="relative h-32 w-32 overflow-hidden rounded-xl border">
-          <Image src={preview} alt="Preview" fill className="object-cover" />
+          <img src={preview} alt="Preview" className="w-full h-full object-cover" />
           <button
             type="button"
-            className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white"
+            className="absolute right-1 top-1 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
             onClick={() => {
               setPreview("");
               onChange("");
@@ -99,6 +104,10 @@ export default function ImageUpload({ value, onChange, bucket, label = "Image" }
           </button>
         </div>
       )}
+      
+      <p className="text-xs text-gray-500">
+        Upload JPG, PNG, WebP or GIF (max 5MB) or paste an image URL
+      </p>
     </div>
   );
 }
