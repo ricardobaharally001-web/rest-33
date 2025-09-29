@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "next-themes";
+import HydrationWrapper from "@/components/HydrationWrapper";
 
 export const metadata: Metadata = {
   title: "cook-shop",
@@ -19,8 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           enableSystem
           disableTransitionOnChange={false}
         >
-          <Navbar />
-          <main className="container py-6">{children}</main>
+          <HydrationWrapper>
+            <Navbar />
+            <main className="container py-6">{children}</main>
+          </HydrationWrapper>
         </ThemeProvider>
       </body>
     </html>

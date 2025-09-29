@@ -34,6 +34,9 @@ export const useCart = create<CartState>()(
       clear: () => set({ items: [] }),
       subtotal: () => get().items.reduce((sum, i) => sum + i.price_cents * i.qty, 0)
     }),
-    { name: "cook-shop-cart" }
+    { 
+      name: "cook-shop-cart",
+      skipHydration: true 
+    }
   )
 );

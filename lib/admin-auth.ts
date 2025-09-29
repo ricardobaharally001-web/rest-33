@@ -71,6 +71,9 @@ export const useAdminAuth = create<AdminAuthState>()(
         }
       }
     }),
-    { name: "admin-auth" }
+    { 
+      name: "admin-auth",
+      skipHydration: true 
+    }
   )
 );

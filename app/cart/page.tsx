@@ -12,7 +12,9 @@ export default function CartPage() {
   const [settings, setSettings] = React.useState<any>({});
   const [customerName, setCustomerName] = React.useState("");
 
-  React.useEffect(() => { getSettings().then(setSettings); }, []);
+  React.useEffect(() => { 
+    getSettings().then(setSettings); 
+  }, []);
 
   const checkout = () => {
     const lines = items.map(i => `• ${i.name} × ${i.qty} — ${money(i.price_cents * i.qty)}`);

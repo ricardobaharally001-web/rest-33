@@ -1,7 +1,7 @@
 "use client";
 import { useAdminAuth } from "@/lib/admin-auth";
 import AdminLogin from "./AdminLogin";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 
 interface AdminLayoutProps {
   children: ReactNode;
