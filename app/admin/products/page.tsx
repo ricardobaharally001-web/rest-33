@@ -2,7 +2,8 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ImageUpload";
-import { Edit2, Trash2, Save, X } from "lucide-react";
+import { Edit2, Trash2, Save, X, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function ProductsPage() {
   const [rows, setRows] = useState<any[]>([]);
@@ -32,11 +33,9 @@ export default function ProductsPage() {
       
       if (productsError) {
         console.error("Products error:", productsError);
-        alert("Error loading products: " + productsError.message);
       }
       if (catsError) {
         console.error("Categories error:", catsError);
-        alert("Error loading categories: " + catsError.message);
       }
       
       setRows(products || []);
@@ -56,11 +55,20 @@ export default function ProductsPage() {
     
     setLoading(true);
     try {
+      const dataToSave = {
+        name: form.name,
+        description: form.description || null,
+        price_cents: form.price_cents,
+        stock: form.stock,
+        image_url: form.image_url || null,
+        category_id: form.category_id || null,
+        is_active: form.is_active
+      };
+
       if (editingId) {
-        // Update existing product
         const { error } = await supabase
           .from("products")
-          .update(form)
+          .update(dataToSave)
           .eq("id", editingId);
         
         if (error) {
@@ -70,10 +78,9 @@ export default function ProductsPage() {
           setEditingId(null);
         }
       } else {
-        // Add new product
         const { error } = await supabase
           .from("products")
-          .insert(form);
+          .insert(dataToSave);
         
         if (error) {
           console.error("Insert error:", error);
@@ -81,7 +88,6 @@ export default function ProductsPage() {
         }
       }
       
-      // Reset form and reload
       setForm({ 
         name: "", 
         description: "", 
@@ -111,6 +117,7 @@ export default function ProductsPage() {
       category_id: product.category_id || "",
       is_active: product.is_active
     });
+    window.scrollTo(0, 0);
   };
 
   const cancelEdit = () => {
@@ -148,9 +155,14 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Manage Products</h1>
+      <div className="flex items-center gap-4">
+        <Link href="/admin" className="btn btn-ghost">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Admin
+        </Link>
+        <h1 className="text-2xl font-bold">Manage Products</h1>
+      </div>
       
-      {/* Add/Edit form */}
       <div className="card p-6 space-y-4">
         <h2 className="font-semibold">
           {editingId ? "Edit Product" : "Add New Product"}
@@ -238,12 +250,11 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Products list */}
       <div className="grid gap-3">
         {rows.map(r => (
           <div key={r.id} className="card p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              {r.image_url && (
+              {r.image_url && r.image_url !== '/placeholder.svg' && (
                 <img 
                   src={r.image_url} 
                   alt={r.name} 
