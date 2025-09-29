@@ -55,44 +55,45 @@ create policy "Public can read settings"
   on public.site_settings for select 
   using (true);
 
--- Only authenticated users can modify categories
-create policy "Authenticated users can insert categories" 
+-- Allow public access for basic operations (for demo purposes)
+-- In production, you should implement proper authentication
+create policy "Public can insert categories" 
   on public.categories for insert 
-  with check (auth.role() = 'authenticated');
+  with check (true);
 
-create policy "Authenticated users can update categories" 
+create policy "Public can update categories" 
   on public.categories for update 
-  using (auth.role() = 'authenticated');
+  using (true);
 
-create policy "Authenticated users can delete categories" 
+create policy "Public can delete categories" 
   on public.categories for delete 
-  using (auth.role() = 'authenticated');
+  using (true);
 
--- Only authenticated users can modify products
-create policy "Authenticated users can insert products" 
+-- Allow public access for products
+create policy "Public can insert products" 
   on public.products for insert 
-  with check (auth.role() = 'authenticated');
+  with check (true);
 
-create policy "Authenticated users can update products" 
+create policy "Public can update products" 
   on public.products for update 
-  using (auth.role() = 'authenticated');
+  using (true);
 
-create policy "Authenticated users can delete products" 
+create policy "Public can delete products" 
   on public.products for delete 
-  using (auth.role() = 'authenticated');
+  using (true);
 
--- Only authenticated users can modify settings
-create policy "Authenticated users can insert settings" 
+-- Allow public access for settings
+create policy "Public can insert settings" 
   on public.site_settings for insert 
-  with check (auth.role() = 'authenticated');
+  with check (true);
 
-create policy "Authenticated users can update settings" 
+create policy "Public can update settings" 
   on public.site_settings for update 
-  using (auth.role() = 'authenticated');
+  using (true);
 
-create policy "Authenticated users can delete settings" 
+create policy "Public can delete settings" 
   on public.site_settings for delete 
-  using (auth.role() = 'authenticated');
+  using (true);
 
 -- 7. Insert sample categories
 insert into public.categories (name, description, image_url) values
@@ -147,20 +148,20 @@ on conflict (key) do nothing;
 
 -- 10. Storage policies (run after creating buckets)
 -- Note: Create buckets first in Supabase Storage UI, then run these
--- For product-images bucket
+-- For product-images bucket (allow public access for demo)
 INSERT INTO storage.policies (name, bucket_id, operation, definition)
 VALUES 
   ('Public Access product-images', 'product-images', 'SELECT', 'true'::jsonb),
-  ('Authenticated users can upload product-images', 'product-images', 'INSERT', '{"role": "authenticated"}'::jsonb),
-  ('Authenticated users can update product-images', 'product-images', 'UPDATE', '{"role": "authenticated"}'::jsonb),
-  ('Authenticated users can delete product-images', 'product-images', 'DELETE', '{"role": "authenticated"}'::jsonb)
+  ('Public can upload product-images', 'product-images', 'INSERT', 'true'::jsonb),
+  ('Public can update product-images', 'product-images', 'UPDATE', 'true'::jsonb),
+  ('Public can delete product-images', 'product-images', 'DELETE', 'true'::jsonb)
 ON CONFLICT (name, bucket_id) DO NOTHING;
 
--- For brand-assets bucket  
+-- For brand-assets bucket (allow public access for demo)
 INSERT INTO storage.policies (name, bucket_id, operation, definition)
 VALUES
   ('Public Access brand-assets', 'brand-assets', 'SELECT', 'true'::jsonb),
-  ('Authenticated users can upload brand-assets', 'brand-assets', 'INSERT', '{"role": "authenticated"}'::jsonb),
-  ('Authenticated users can update brand-assets', 'brand-assets', 'UPDATE', '{"role": "authenticated"}'::jsonb),
-  ('Authenticated users can delete brand-assets', 'brand-assets', 'DELETE', '{"role": "authenticated"}'::jsonb)
+  ('Public can upload brand-assets', 'brand-assets', 'INSERT', 'true'::jsonb),
+  ('Public can update brand-assets', 'brand-assets', 'UPDATE', 'true'::jsonb),
+  ('Public can delete brand-assets', 'brand-assets', 'DELETE', 'true'::jsonb)
 ON CONFLICT (name, bucket_id) DO NOTHING;

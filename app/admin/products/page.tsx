@@ -182,7 +182,7 @@ export default function ProductsPage() {
             onChange={e => setForm({...form, description: e.target.value})} 
           />
           <div>
-            <label className="label text-xs mb-1">Price ($)</label>
+            <label className="label text-xs mb-1">PRICE ($)</label>
             <input 
               type="number" 
               className="input" 
@@ -194,7 +194,7 @@ export default function ProductsPage() {
             />
           </div>
           <div>
-            <label className="label text-xs mb-1">Stock Quantity</label>
+            <label className="label text-xs mb-1">STOCK QUANTITY</label>
             <input 
               type="number" 
               className="input" 
@@ -204,24 +204,29 @@ export default function ProductsPage() {
               min="0"
             />
           </div>
-          <select 
-            className="input" 
-            value={form.category_id} 
-            onChange={e => setForm({...form, category_id: e.target.value})}
-          >
-            <option value="">Select category</option>
-            {cats.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <label className="flex items-center gap-2">
-            <input 
-              type="checkbox" 
-              checked={form.is_active} 
-              onChange={e => setForm({...form, is_active: e.target.checked})} 
-            />
-            <span>Active (visible in store)</span>
-          </label>
+          <div className="md:col-span-2">
+            <label className="label text-xs mb-1">CATEGORY</label>
+            <select 
+              className="input" 
+              value={form.category_id} 
+              onChange={e => setForm({...form, category_id: e.target.value})}
+            >
+              <option value="">Select category</option>
+              {cats.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                checked={form.is_active} 
+                onChange={e => setForm({...form, is_active: e.target.checked})} 
+              />
+              <span>Active (visible in store)</span>
+            </label>
+          </div>
         </div>
         
         <ImageUpload
@@ -252,40 +257,42 @@ export default function ProductsPage() {
 
       <div className="grid gap-3">
         {rows.map(r => (
-          <div key={r.id} className="card p-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              {r.image_url && r.image_url !== '/placeholder.svg' && (
-                <img 
-                  src={r.image_url} 
-                  alt={r.name} 
-                  className="h-16 w-16 rounded object-cover" 
-                />
-              )}
-              <div>
-                <div className="font-medium">{r.name}</div>
-                <div className="text-sm text-slate-600 dark:text-slate-300">
-                  ${(r.price_cents / 100).toFixed(2)} · Stock: {r.stock}
-                  {!r.is_active && <span className="ml-2 text-red-500">(Inactive)</span>}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {cats.find(c => c.id === r.category_id)?.name || "No category"}
+          <div key={r.id} className="card p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-4 flex-1">
+                {r.image_url && r.image_url !== '/placeholder.svg' && (
+                  <img 
+                    src={r.image_url} 
+                    alt={r.name} 
+                    className="h-16 w-16 rounded object-cover flex-shrink-0" 
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium truncate">{r.name}</div>
+                  <div className="text-sm text-slate-600 dark:text-slate-300">
+                    ${(r.price_cents / 100).toFixed(2)} · Stock: {r.stock}
+                    {!r.is_active && <span className="ml-2 text-red-500">(Inactive)</span>}
+                  </div>
+                  <div className="text-xs text-slate-500">
+                    {cats.find(c => c.id === r.category_id)?.name || "No category"}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex gap-2">
-              <button 
-                className="btn btn-ghost" 
-                onClick={() => startEdit(r)}
-              >
-                <Edit2 className="h-4 w-4" />
-              </button>
-              <button 
-                className="btn btn-danger" 
-                onClick={() => remove(r.id)}
-                disabled={loading}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
+              <div className="flex gap-2 flex-shrink-0">
+                <button 
+                  className="btn btn-ghost" 
+                  onClick={() => startEdit(r)}
+                >
+                  <Edit2 className="h-4 w-4" />
+                </button>
+                <button 
+                  className="btn btn-danger" 
+                  onClick={() => remove(r.id)}
+                  disabled={loading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         ))}

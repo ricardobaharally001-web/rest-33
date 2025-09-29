@@ -202,17 +202,17 @@ export default function CategoriesPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-4 flex-1">
                   {r.image_url && r.image_url !== '/placeholder.svg' && (
-                    <img src={r.image_url} alt={r.name} className="h-12 w-12 rounded object-cover" />
+                    <img src={r.image_url} alt={r.name} className="h-12 w-12 rounded object-cover flex-shrink-0" />
                   )}
-                  <div>
-                    <div className="font-medium">{r.name}</div>
-                    <div className="text-sm text-slate-600 dark:text-slate-300">{r.description}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{r.name}</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300 truncate">{r.description}</div>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-shrink-0">
                   <button 
                     className="btn btn-ghost" 
                     onClick={() => startEdit(r)}
