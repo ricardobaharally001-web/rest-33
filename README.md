@@ -1,33 +1,42 @@
-# cook-shop (Next.js + Supabase + Render)
+# Cook Shop - Modern E-commerce Platform
 
-Fast, modern storefront and admin dashboard for **cook-shop**.
+A fast, modern storefront and admin dashboard built with Next.js, Supabase, and Tailwind CSS.
 
 ## Features
-- Storefront with category filter, search, product grid, add-to-cart
-- Cart persisted with Zustand → WhatsApp checkout (`wa.me/<phone>?text=<order>`)
-- Admin settings/categories/products (Supabase authenticated users can write)
-- Image URLs (use Supabase public storage buckets `product-images` and `brand-assets`)
-- Dark mode (persistent), mobile-first nav
-- SEO (OG/meta, robots, sitemap)
-- Accessibility-first components & focus states
 
-## 1) Prereqs
-- Supabase project with anon/public URL + anon key
-- Storage buckets: `product-images`, `brand-assets`
-- Enable Email auth (or any provider you prefer)
+✨ **Storefront**
+- Category filtering
+- Product search
+- Shopping cart with persistence
+- WhatsApp checkout integration
+- Dark/light mode toggle
+- Mobile-responsive design
 
-## 2) Database
-Paste `supabase.sql` into the Supabase SQL editor and run.  
-If you already have `categories`/`products`, this will **not** overwrite, and it will create the `site_settings` table. Policies enable public read and authenticated write.
+🛠️ **Admin Dashboard**
+- Product management (CRUD)
+- Category management
+- Site settings configuration
+- Image upload from device or URL
+- Stock management
 
-## 3) Local run
+🔒 **Security**
+- Supabase RLS policies
+- Authenticated admin access
+- Public read, authenticated write
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 18, TypeScript
+- **Database**: Supabase (PostgreSQL)
+- **Styling**: Tailwind CSS
+- **State**: Zustand
+- **Icons**: Lucide React
+- **Deployment**: Render
+
+## Quick Start
+
+### 1. Clone the Repository
 ```bash
-# 1) Clone & install
-npm i
-
-# 2) Configure env
-cp .env.example .env
-# put NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-# 3) Dev
-npm run dev
+git clone https://github.com/your-username/cook-shop.git
+cd cook-shop
+npm install
