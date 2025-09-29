@@ -3,7 +3,6 @@ import { useCart } from "@/lib/cart-store";
 import { getSettings } from "@/lib/supabase";
 import React from "react";
 import { ShoppingCart, Trash2, Package } from "lucide-react";
-import Image from "next/image";
 
 function money(cents: number) { return `$${(cents/100).toFixed(2)}`; }
 
