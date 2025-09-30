@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-store";
-import { ShoppingBag, Star, Check } from "lucide-react";
+import { ShoppingBag, Check } from "lucide-react";
 import { useState } from "react";
 
 export default function ProductCard({ product }: { product: any }) {
@@ -49,12 +49,8 @@ export default function ProductCard({ product }: { product: any }) {
       </div>
 
       <div className="p-4">
-        <div className="mb-2 flex items-start justify-between">
+        <div className="mb-2">
           <h3 className="font-bold text-gray-900 dark:text-white">{product.name}</h3>
-          <div className="flex items-center gap-0.5">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs text-gray-500">4.5</span>
-          </div>
         </div>
         
         <p className="mb-3 line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
@@ -69,20 +65,23 @@ export default function ProductCard({ product }: { product: any }) {
             {product.stock === 0 && (
               <p className="text-xs text-red-500">Out of stock</p>
             )}
+            {product.showStock && product.stock > 0 && (
+              <p className="text-xs text-gray-500">Stock: {product.stock}</p>
+            )}
           </div>
           
           <button 
             className={`rounded-xl px-4 py-2 font-medium transition-all flex items-center gap-1 ${
               isAdding 
                 ? "bg-green-500 text-white" 
-                : product.stock === 0
+                : (product.showStock && product.stock === 0)
                 ? "cursor-not-allowed bg-gray-200 text-gray-400"
                 : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:shadow-lg"
             }`}
             onClick={handleAdd}
-            disabled={product.stock === 0}
+            disabled={product.showStock && product.stock === 0}
           >
-            {isAdding ? <><Check className="h-4 w-4" /> Added</> : product.stock === 0 ? "Sold Out" : "Add"}
+            {isAdding ? <><Check className="h-4 w-4" /> Added</> : (product.showStock && product.stock === 0) ? "Sold Out" : "Add"}
           </button>
         </div>
       </div>

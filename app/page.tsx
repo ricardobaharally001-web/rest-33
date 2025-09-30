@@ -10,10 +10,20 @@ export default function Storefront() {
   const [products, setProducts] = useState<any[]>([]);
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<any>({});
 
   useEffect(() => {
     supabase.from("categories").select("*").then(({ data }) => {
       setCategories(data || []);
+    });
+    
+    // Load settings
+    supabase.from("site_settings").select("*").then(({ data }) => {
+      const settingsMap: any = {};
+      (data || []).forEach((row: any) => {
+        settingsMap[row.key] = row.value;
+      });
+      setSettings(settingsMap);
     });
   }, []);
 
@@ -23,10 +33,18 @@ export default function Storefront() {
       let req = supabase.from("products").select("*").eq("is_active", true);
       if (active) req = req.eq("category_id", active);
       const { data } = await req;
-      setProducts((data || []).filter(p => p.name.toLowerCase().includes(q.toLowerCase())));
+      const filteredProducts = (data || []).filter(p => p.name.toLowerCase().includes(q.toLowerCase()));
+      
+      // Add stock display setting to each product
+      const productsWithStockSetting = filteredProducts.map(product => ({
+        ...product,
+        showStock: settings.stock_display === true
+      }));
+      
+      setProducts(productsWithStockSetting);
       setLoading(false);
     })();
-  }, [active, q]);
+  }, [active, q, settings]);
 
   return (
     <>

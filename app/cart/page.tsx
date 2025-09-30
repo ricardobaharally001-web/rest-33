@@ -1,6 +1,6 @@
 "use client";
 import { useCart } from "@/lib/cart-store";
-import { getSettings } from "@/lib/supabase";
+import { getSettings, supabase } from "@/lib/supabase";
 import React from "react";
 import { ShoppingCart, Trash2, Package } from "lucide-react";
 
@@ -16,10 +16,45 @@ export default function CartPage() {
     getSettings().then(setSettings); 
   }, []);
 
-  const checkout = () => {
+  const checkout = async () => {
     if (!customerName.trim()) {
       alert("Please enter your name to proceed with checkout");
       return;
+    }
+
+    // Check if stock management is enabled
+    if (settings.stock_display === true) {
+      // Deduct stock for each item in the cart
+      try {
+        for (const item of items) {
+          // First get current stock
+          const { data: productData, error: fetchError } = await supabase
+            .from("products")
+            .select("stock")
+            .eq("id", item.id)
+            .single();
+          
+          if (fetchError) {
+            console.error("Error fetching product stock:", fetchError);
+            continue;
+          }
+          
+          // Calculate new stock
+          const newStock = Math.max(0, (productData.stock || 0) - item.qty);
+          
+          // Update stock
+          const { error: updateError } = await supabase
+            .from("products")
+            .update({ stock: newStock })
+            .eq("id", item.id);
+          
+          if (updateError) {
+            console.error("Error updating stock:", updateError);
+          }
+        }
+      } catch (error) {
+        console.error("Error processing stock update:", error);
+      }
     }
 
     const lines = items.map(i => `• ${i.name} × ${i.qty} — ${money(i.price_cents * i.qty)}`);

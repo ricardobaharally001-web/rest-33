@@ -13,7 +13,8 @@ export default function SettingsPage() {
     business_name: "", 
     logo_url: "", 
     theme: "light", 
-    whatsapp_number: "" 
+    whatsapp_number: "",
+    stock_display: false
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -151,6 +152,20 @@ export default function SettingsPage() {
             />
             <p className="text-xs text-gray-500 mt-1">
               Include country code without + or spaces (e.g., 15551234567 for US)
+            </p>
+          </div>
+          
+          <div>
+            <label className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                checked={values.stock_display || false} 
+                onChange={e => setValues({...values, stock_display: e.target.checked})} 
+              />
+              <span>Enable Stock Display & Management</span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1">
+              When enabled, stock will be displayed on the store page and reduced when orders are placed
             </p>
           </div>
           
