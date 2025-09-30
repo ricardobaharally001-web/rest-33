@@ -191,7 +191,6 @@ export default function CartPage() {
             <button 
               className="btn btn-primary mb-2 w-full" 
               onClick={checkout}
-              disabled={!customerName.trim()}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Checkout via WhatsApp
