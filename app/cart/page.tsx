@@ -11,14 +11,24 @@ export default function CartPage() {
   const sub = subtotal();
   const [settings, setSettings] = React.useState<any>({});
   const [customerName, setCustomerName] = React.useState("");
+  const [showAlert, setShowAlert] = React.useState(false);
+  const [alertMessage, setAlertMessage] = React.useState("");
 
   React.useEffect(() => { 
     getSettings().then(setSettings); 
   }, []);
 
+  const showNotification = (message: string) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 3000);
+  };
+
   const checkout = async () => {
     if (!customerName.trim()) {
-      alert("Please enter your name to proceed with checkout");
+      showNotification("Please enter your name to proceed with checkout");
       return;
     }
 
@@ -89,6 +99,16 @@ export default function CartPage() {
 
   return (
     <div className="mx-auto max-w-4xl">
+      {/* Notification Alert */}
+      {showAlert && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-slide-up">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          {alertMessage}
+        </div>
+      )}
+      
       <h1 className="mb-8 text-3xl font-bold">Shopping Cart</h1>
       
       <div className="grid gap-6 lg:grid-cols-3">
