@@ -61,12 +61,12 @@ export async function PUT(request: NextRequest) {
           sanitizedSettings[key] = typeof value === 'string' ? value.trim().slice(0, 500) : value;
           break;
         case 'theme':
-          sanitizedSettings[key] = ['light', 'dark', 'system'].includes(value) ? value : 'system';
+          sanitizedSettings[key] = ['light', 'dark', 'system'].includes(value as string) ? value : 'system';
           break;
         case 'whatsapp_number':
           // Remove all non-digit characters and validate
           const cleanNumber = typeof value === 'string' ? value.replace(/\D/g, '') : '';
-          sanitizedSettings[key] = cleanNumber.length >= 10 ? cleanNumber : value;
+          sanitizedSettings[key] = cleanNumber.length >= 10 ? cleanNumber : (value as string);
           break;
         case 'stock_display':
           sanitizedSettings[key] = Boolean(value);
