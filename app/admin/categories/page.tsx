@@ -17,48 +17,54 @@ export default function CategoriesPage() {
 
   const load = async () => {
     try {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .order("created_at", { ascending: true });
-      if (error) {
-        console.error("Error loading categories:", error);
-      } else {
-        setRows(data || []);
+      const response = await fetch('/api/admin/categories');
+      
+      if (!response.ok) {
+        throw new Error('Failed to load categories');
       }
+
+      const data = await response.json();
+      setRows(data.data || []);
     } catch (err) {
       console.error("Load error:", err);
+      alert("Error loading categories: " + (err as Error).message);
     }
   };
 
   useEffect(() => { load(); }, []);
 
   const add = async () => {
-    if (!name) {
+    if (!name.trim()) {
       alert("Please enter a category name");
       return;
     }
     
     setLoading(true);
     try {
-      const { error } = await supabase.from("categories").insert({ 
-        name, 
-        description: description || null, 
-        image_url: image_url || null
+      const response = await fetch('/api/admin/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          description: description.trim() || null,
+          image_url: image_url.trim() || null
+        })
       });
-      
-      if (error) {
-        console.error("Insert error:", error);
-        alert("Error adding category: " + error.message);
-      } else {
-        setName(""); 
-        setDescription(""); 
-        setImageUrl("");
-        await load();
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add category');
       }
+
+      setName(""); 
+      setDescription(""); 
+      setImageUrl("");
+      await load();
     } catch (err) {
       console.error("Add error:", err);
-      alert("Error adding category");
+      alert("Error adding category: " + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -74,27 +80,36 @@ export default function CategoriesPage() {
   };
 
   const saveEdit = async () => {
+    if (!editForm.name?.trim()) {
+      alert("Please enter a category name");
+      return;
+    }
+
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from("categories")
-        .update({
-          name: editForm.name,
-          description: editForm.description || null,
-          image_url: editForm.image_url || null
+      const response = await fetch('/api/admin/categories', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: editingId,
+          name: editForm.name.trim(),
+          description: editForm.description?.trim() || null,
+          image_url: editForm.image_url?.trim() || null
         })
-        .eq("id", editingId);
-      
-      if (error) {
-        console.error("Update error:", error);
-        alert("Error updating category: " + error.message);
-      } else {
-        setEditingId(null);
-        await load();
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update category');
       }
+
+      setEditingId(null);
+      await load();
     } catch (err) {
       console.error("Save error:", err);
-      alert("Error saving category");
+      alert("Error saving category: " + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -105,16 +120,19 @@ export default function CategoriesPage() {
     
     setLoading(true);
     try {
-      const { error } = await supabase.from("categories").delete().eq("id", id);
-      if (error) {
-        console.error("Delete error:", error);
-        alert("Error deleting category: " + error.message);
-      } else {
-        await load();
+      const response = await fetch(`/api/admin/categories?id=${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete category');
       }
+
+      await load();
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Error deleting category");
+      alert("Error deleting category: " + (err as Error).message);
     } finally {
       setLoading(false);
     }

@@ -25,38 +25,38 @@ export default function SettingsPage() {
   useEffect(() => {
     (async () => {
       try {
-        const { data, error } = await supabase.from("site_settings").select("*");
-        if (error) {
-          console.error("Load error:", error);
-          return;
+        const response = await fetch('/api/admin/settings');
+        
+        if (!response.ok) {
+          throw new Error('Failed to load settings');
         }
-        const map: any = {}; 
-        (data || []).forEach((r: any) => map[r.key] = r.value);
-        setValues((prev: any) => ({ ...prev, ...map }));
+
+        const data = await response.json();
+        setValues((prev: any) => ({ ...prev, ...data.data }));
       } catch (err) {
         console.error("Settings error:", err);
+        alert("Error loading settings: " + (err as Error).message);
       }
     })();
   }, []);
-
-  const upsert = async (key: string, value: any) => {
-    const { error } = await supabase
-      .from("site_settings")
-      .upsert({ key, value }, { onConflict: "key" });
-    
-    if (error) {
-      console.error(`Error saving ${key}:`, error);
-      throw error;
-    }
-  };
 
   const save = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await Promise.all(
-        Object.entries(values).map(([k, v]) => upsert(k, v))
-      );
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save settings');
+      }
+
       alert("Settings saved successfully!");
     } catch (error: any) {
       console.error("Save error:", error);
@@ -77,20 +77,32 @@ export default function SettingsPage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordMessage("Password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      setPasswordMessage("Password must be at least 8 characters");
+      setPasswordLoading(false);
+      return;
+    }
+
+    // Basic password strength validation
+    const hasUpperCase = /[A-Z]/.test(newPassword);
+    const hasLowerCase = /[a-z]/.test(newPassword);
+    const hasNumbers = /\d/.test(newPassword);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(newPassword);
+
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      setPasswordMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.");
       setPasswordLoading(false);
       return;
     }
 
     try {
-      const success = await changePassword(newPassword);
-      if (success) {
+      const result = await changePassword(newPassword);
+      if (result.success) {
         setPasswordMessage("Password changed successfully!");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setPasswordMessage("Failed to change password");
+        setPasswordMessage(result.error || "Failed to change password");
       }
     } catch (error) {
       setPasswordMessage("Error changing password");

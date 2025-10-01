@@ -23,26 +23,26 @@ export default function ProductsPage() {
 
   const load = async () => {
     try {
-      const { data: products, error: productsError } = await supabase
-        .from("products")
-        .select("*")
-        .order("created_at", { ascending: true });
-      
-      const { data: categories, error: catsError } = await supabase
-        .from("categories")
-        .select("*");
-      
-      if (productsError) {
-        console.error("Products error:", productsError);
+      const [productsResponse, categoriesResponse] = await Promise.all([
+        fetch('/api/admin/products'),
+        fetch('/api/admin/categories')
+      ]);
+
+      if (!productsResponse.ok) {
+        throw new Error('Failed to load products');
       }
-      if (catsError) {
-        console.error("Categories error:", catsError);
+      if (!categoriesResponse.ok) {
+        throw new Error('Failed to load categories');
       }
+
+      const productsData = await productsResponse.json();
+      const categoriesData = await categoriesResponse.json();
       
-      setRows(products || []);
-      setCats(categories || []);
+      setRows(productsData.data || []);
+      setCats(categoriesData.data || []);
     } catch (err) {
       console.error("Load error:", err);
+      alert("Error loading data: " + (err as Error).message);
     }
   };
 
@@ -57,38 +57,33 @@ export default function ProductsPage() {
     setLoading(true);
     try {
       const dataToSave = {
-        name: form.name,
-        description: form.description || null,
-        price_cents: form.price_cents,
-        stock: form.stock,
-        image_url: form.image_url || null,
+        name: form.name.trim(),
+        description: form.description?.trim() || null,
+        price_cents: Math.max(0, form.price_cents),
+        stock: Math.max(0, form.stock),
+        image_url: form.image_url?.trim() || null,
         category_id: form.category_id || null,
-        is_active: form.is_active
+        is_active: Boolean(form.is_active)
       };
 
-      if (editingId) {
-        const { error } = await supabase
-          .from("products")
-          .update(dataToSave)
-          .eq("id", editingId);
-        
-        if (error) {
-          console.error("Update error:", error);
-          alert("Error updating product: " + error.message);
-        } else {
-          setEditingId(null);
-        }
-      } else {
-        const { error } = await supabase
-          .from("products")
-          .insert(dataToSave);
-        
-        if (error) {
-          console.error("Insert error:", error);
-          alert("Error adding product: " + error.message);
-        }
+      const url = editingId ? '/api/admin/products' : '/api/admin/products';
+      const method = editingId ? 'PUT' : 'POST';
+      const body = editingId ? { id: editingId, ...dataToSave } : dataToSave;
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save product');
       }
-      
+
+      setEditingId(null);
       setForm({ 
         name: "", 
         description: "", 
@@ -101,7 +96,7 @@ export default function ProductsPage() {
       await load();
     } catch (err) {
       console.error("Save error:", err);
-      alert("Error saving product");
+      alert("Error saving product: " + (err as Error).message);
     } finally {
       setLoading(false);
     }
@@ -139,16 +134,19 @@ export default function ProductsPage() {
     
     setLoading(true);
     try {
-      const { error } = await supabase.from("products").delete().eq("id", id);
-      if (error) {
-        console.error("Delete error:", error);
-        alert("Error deleting product: " + error.message);
-      } else {
-        await load();
+      const response = await fetch(`/api/admin/products?id=${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete product');
       }
+
+      await load();
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Error deleting product");
+      alert("Error deleting product: " + (err as Error).message);
     } finally {
       setLoading(false);
     }

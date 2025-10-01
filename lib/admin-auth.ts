@@ -1,79 +1,171 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { supabase } from "./supabase";
+import type { User, Session } from "@supabase/supabase-js";
 
 type AdminAuthState = {
+  user: User | null;
+  session: Session | null;
   isAuthenticated: boolean;
-  login: (password: string) => Promise<boolean>;
-  logout: () => void;
-  changePassword: (newPassword: string) => Promise<boolean>;
-  checkPassword: (password: string) => Promise<boolean>;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  changePassword: (newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
+  initialize: () => Promise<void>;
 };
 
 export const useAdminAuth = create<AdminAuthState>()(
   persist(
     (set, get) => ({
+      user: null,
+      session: null,
       isAuthenticated: false,
+      isLoading: true,
       
-      login: async (password: string) => {
+      initialize: async () => {
         try {
-          const isValid = await get().checkPassword(password);
-          if (isValid) {
-            set({ isAuthenticated: true });
-            return true;
+          set({ isLoading: true });
+          
+          // Get initial session
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error("Session error:", error);
+            set({ isLoading: false });
+            return;
           }
-          return false;
+          
+          if (session) {
+            set({ 
+              user: session.user, 
+              session, 
+              isAuthenticated: true,
+              isLoading: false 
+            });
+          } else {
+            set({ 
+              user: null, 
+              session: null, 
+              isAuthenticated: false,
+              isLoading: false 
+            });
+          }
+          
+          // Listen for auth changes
+          supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+              set({ 
+                user: session.user, 
+                session, 
+                isAuthenticated: true 
+              });
+            } else if (event === 'SIGNED_OUT') {
+              set({ 
+                user: null, 
+                session: null, 
+                isAuthenticated: false 
+              });
+            }
+          });
         } catch (error) {
-          console.error("Login error:", error);
-          return false;
+          console.error("Auth initialization error:", error);
+          set({ isLoading: false });
         }
       },
       
-      logout: () => {
-        set({ isAuthenticated: false });
-      },
-      
-      checkPassword: async (password: string) => {
+      login: async (email: string, password: string) => {
         try {
-          const { data, error } = await supabase
-            .from("site_settings")
-            .select("value")
-            .eq("key", "admin_password")
-            .single();
+          set({ isLoading: true });
           
-          if (error || !data) {
-            // If no password is set, use default password
-            return password === "admin123";
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: email.trim().toLowerCase(),
+            password: password
+          });
+          
+          if (error) {
+            set({ isLoading: false });
+            return { success: false, error: error.message };
           }
           
-          return data.value === password;
+          if (data.user && data.session) {
+            set({ 
+              user: data.user, 
+              session: data.session, 
+              isAuthenticated: true,
+              isLoading: false 
+            });
+            return { success: true };
+          }
+          
+          set({ isLoading: false });
+          return { success: false, error: "Login failed" };
         } catch (error) {
-          console.error("Password check error:", error);
-          return false;
+          console.error("Login error:", error);
+          set({ isLoading: false });
+          return { success: false, error: "An unexpected error occurred" };
+        }
+      },
+      
+      logout: async () => {
+        try {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            console.error("Logout error:", error);
+          }
+          
+          set({ 
+            user: null, 
+            session: null, 
+            isAuthenticated: false 
+          });
+        } catch (error) {
+          console.error("Logout error:", error);
         }
       },
       
       changePassword: async (newPassword: string) => {
         try {
-          const { error } = await supabase
-            .from("site_settings")
-            .upsert({ key: "admin_password", value: newPassword }, { onConflict: "key" });
+          const { error } = await supabase.auth.updateUser({
+            password: newPassword
+          });
           
           if (error) {
-            console.error("Password change error:", error);
-            return false;
+            return { success: false, error: error.message };
           }
           
-          return true;
+          return { success: true };
         } catch (error) {
           console.error("Password change error:", error);
-          return false;
+          return { success: false, error: "An unexpected error occurred" };
+        }
+      },
+      
+      resetPassword: async (email: string) => {
+        try {
+          const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+            redirectTo: `${window.location.origin}/admin/reset-password`
+          });
+          
+          if (error) {
+            return { success: false, error: error.message };
+          }
+          
+          return { success: true };
+        } catch (error) {
+          console.error("Password reset error:", error);
+          return { success: false, error: "An unexpected error occurred" };
         }
       }
     }),
     { 
       name: "admin-auth",
-      skipHydration: true 
+      skipHydration: true,
+      partialize: (state) => ({ 
+        user: state.user, 
+        session: state.session, 
+        isAuthenticated: state.isAuthenticated 
+      })
     }
   )
 );
