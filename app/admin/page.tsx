@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import AdminLayout from "@/components/AdminLayout";
-import { useAdminAuth } from "@/lib/admin-auth";
+import { useSimpleAdminAuth } from "@/lib/simple-admin-auth";
 import { LogOut } from "lucide-react";
 
 export default function AdminIndex() {
-  const { logout } = useAdminAuth();
+  const { logout } = useSimpleAdminAuth();
 
   return (
     <AdminLayout>

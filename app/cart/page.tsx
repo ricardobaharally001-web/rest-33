@@ -28,6 +28,7 @@ export default function CartPage() {
 
   const checkout = async () => {
     if (!customerName.trim()) {
+      alert("Please enter your name to proceed with checkout");
       showNotification("Please enter your name to proceed with checkout");
       return;
     }
