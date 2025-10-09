@@ -180,6 +180,7 @@ INSERT INTO public.site_settings (key, value) VALUES
   ('admin_password', '"admin123"'), -- CHANGE THIS IMMEDIATELY AFTER SETUP!
   ('currency', '"GYD"'),
   ('stock_display', 'true'), -- Show stock on storefront
+  ('delivery_available', 'false'), -- Show "Delivery Available" in cart (can be toggled in admin)
   ('delivery_fee', '0'), -- Free delivery (can be changed)
   ('min_order_amount', '0') -- No minimum order (can be changed)
 ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;

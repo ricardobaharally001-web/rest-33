@@ -43,5 +43,7 @@ export async function getSettings() {
     logo_url?: string;
     theme?: string;
     whatsapp_number?: string;
+    stock_display?: boolean;
+    delivery_available?: boolean;
   };
 }

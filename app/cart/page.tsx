@@ -178,10 +178,12 @@ export default function CartPage() {
                 <span className="text-gray-600">Subtotal</span>
                 <span>{formatPrice(sub)}</span>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Delivery</span>
-                <span className="text-green-600">Free</span>
-              </div>
+              {settings.delivery_available === true && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Delivery</span>
+                  <span className="text-green-600">Available</span>
+                </div>
+              )}
               <div className="my-2 border-t pt-2" />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>

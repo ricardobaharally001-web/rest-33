@@ -14,7 +14,8 @@ export default function SettingsPage() {
     logo_url: "", 
     theme: "light", 
     whatsapp_number: "",
-    stock_display: false
+    stock_display: false,
+    delivery_available: false
   });
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -166,6 +167,20 @@ export default function SettingsPage() {
             </label>
             <p className="text-xs text-gray-500 mt-1">
               When enabled, stock will be displayed on the store page and reduced when orders are placed
+            </p>
+          </div>
+          
+          <div>
+            <label className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                checked={values.delivery_available || false} 
+                onChange={e => setValues({...values, delivery_available: e.target.checked})} 
+              />
+              <span>Enable Delivery Available Display</span>
+            </label>
+            <p className="text-xs text-gray-500 mt-1">
+              When enabled, "Delivery Available" will be shown in the cart summary. When disabled, only subtotal and total will be shown.
             </p>
           </div>
           
