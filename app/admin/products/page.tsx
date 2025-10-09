@@ -2,13 +2,15 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import ImageUpload from "@/components/ImageUpload";
-import { Edit2, Trash2, Save, X, ArrowLeft } from "lucide-react";
+import { Edit2, Trash2, Save, X, ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
 import AdminLayout from "@/components/AdminLayout";
 
 export default function ProductsPage() {
   const [rows, setRows] = useState<any[]>([]);
+  const [filteredRows, setFilteredRows] = useState<any[]>([]);
   const [cats, setCats] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form, setForm] = useState<any>({ 
     name: "", 
     description: "", 
@@ -47,6 +49,19 @@ export default function ProductsPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Filter products based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredRows(rows);
+    } else {
+      const filtered = rows.filter(product =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredRows(filtered);
+    }
+  }, [searchQuery, rows]);
 
   const save = async () => {
     if (!form.name || form.price_cents < 0) {
@@ -112,7 +127,7 @@ export default function ProductsPage() {
     setForm({
       name: product.name,
       description: product.description || "",
-      price_cents: product.price_cents,
+      price_cents: product.price_cents, // Already stored as whole dollars
       stock: product.stock,
       image_url: product.image_url || "",
       category_id: product.category_id || "",
@@ -165,6 +180,25 @@ export default function ProductsPage() {
         <h1 className="text-2xl font-bold">Manage Products</h1>
       </div>
       
+      {/* Search Bar */}
+      <div className="card p-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              className="input pl-10"
+              placeholder="Search products by name or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="text-sm text-gray-500">
+            {filteredRows.length} of {rows.length} products
+          </div>
+        </div>
+      </div>
+
       <div className="card p-6 space-y-4">
         <h2 className="font-semibold">
           {editingId ? "Edit Product" : "Add New Product"}
@@ -184,16 +218,19 @@ export default function ProductsPage() {
             onChange={e => setForm({...form, description: e.target.value})} 
           />
           <div>
-            <label className="label text-xs mb-1">PRICE ($)</label>
+            <label className="label text-xs mb-1">PRICE ($) - Enter whole dollars only</label>
             <input 
               type="number" 
               className="input" 
-              placeholder="Price" 
-              value={(form.price_cents / 100).toFixed(2)} 
-              onChange={e => setForm({...form, price_cents: Math.round(parseFloat(e.target.value || '0') * 100)})} 
-              step="0.01"
+              placeholder="Price (e.g., 1500 for $1,500)" 
+              value={form.price_cents} 
+              onChange={e => setForm({...form, price_cents: parseInt(e.target.value || '0')})} 
+              step="1"
               min="0"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Enter whole dollars only (no cents). Example: 1500 for $1,500
+            </p>
           </div>
           <div>
             <label className="label text-xs mb-1">STOCK QUANTITY</label>
@@ -258,7 +295,12 @@ export default function ProductsPage() {
       </div>
 
       <div className="grid gap-3">
-        {rows.map(r => (
+        {filteredRows.length === 0 && searchQuery ? (
+          <div className="card p-6 text-center text-gray-500">
+            No products found matching "{searchQuery}"
+          </div>
+        ) : (
+          filteredRows.map(r => (
           <div key={r.id} className="card p-4">
             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
               <div className="flex items-center gap-4 flex-1">
@@ -272,7 +314,7 @@ export default function ProductsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="font-medium truncate">{r.name}</div>
                   <div className="text-sm text-slate-600 dark:text-slate-300">
-                    ${(r.price_cents / 100).toFixed(2)} · Stock: {r.stock}
+                    ${r.price_cents.toLocaleString()} · Stock: {r.stock}
                     {!r.is_active && <span className="ml-2 text-red-500">(Inactive)</span>}
                   </div>
                   <div className="text-xs text-slate-500">
@@ -297,7 +339,8 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
       </div>
     </AdminLayout>
