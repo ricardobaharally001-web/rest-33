@@ -1,12 +1,12 @@
 "use client";
 import Image from "next/image";
 import { useCart } from "@/lib/cart-store";
+import { formatPrice } from "@/lib/currency";
 import { ShoppingBag, Check } from "lucide-react";
 import { useState } from "react";
 
 export default function ProductCard({ product }: { product: any }) {
   const add = useCart(s => s.add);
-  const price = (product.price_cents ?? 0) / 100;
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAdd = () => {
@@ -60,7 +60,7 @@ export default function ProductCard({ product }: { product: any }) {
         <div className="flex items-center justify-between">
           <div>
             <span className="text-2xl font-bold text-gray-900 dark:text-white">
-              ${price.toFixed(2)}
+              {formatPrice(product.price_cents ?? 0)}
             </span>
             {product.stock === 0 && (
               <p className="text-xs text-red-500">Out of stock</p>

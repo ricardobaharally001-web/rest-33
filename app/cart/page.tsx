@@ -1,10 +1,9 @@
 "use client";
 import { useCart } from "@/lib/cart-store";
 import { getSettings, supabase } from "@/lib/supabase";
+import { formatPrice, formatWhatsAppNumber } from "@/lib/currency";
 import React from "react";
 import { ShoppingCart, Trash2, Package } from "lucide-react";
-
-function money(cents: number) { return `$${(cents/100).toFixed(2)}`; }
 
 export default function CartPage() {
   const { items, updateQty, remove, subtotal, clear } = useCart();
@@ -67,16 +66,18 @@ export default function CartPage() {
       }
     }
 
-    const lines = items.map(i => `• ${i.name} × ${i.qty} — ${money(i.price_cents * i.qty)}`);
+    const lines = items.map(i => `• ${i.name} × ${i.qty} — ${formatPrice(i.price_cents * i.qty)}`);
     const message = [
       `🛒 Order for ${settings?.business_name || "cook-shop"}`,
       `From: ${customerName}`,
       `━━━━━━━━━━━━━━━`,
       ...lines,
       `━━━━━━━━━━━━━━━`,
-      `💰 Total: ${money(sub)}`
+      `💰 Total: ${formatPrice(sub)}`,
+      ``,
+      `📞 Please confirm your order and payment method.`
     ].join("\n");
-    const phone = (settings?.whatsapp_number || "").replace(/[^\d]/g, "");
+    const phone = formatWhatsAppNumber(settings?.whatsapp_number || "");
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
     
@@ -123,7 +124,7 @@ export default function CartPage() {
                 
                 <div className="flex-1">
                   <h3 className="font-semibold">{i.name}</h3>
-                  <p className="text-sm text-gray-500">{money(i.price_cents)} each</p>
+                  <p className="text-sm text-gray-500">{formatPrice(i.price_cents)} each</p>
                 </div>
                 
                 <div className="flex items-center gap-2">
@@ -143,7 +144,7 @@ export default function CartPage() {
                 </div>
                 
                 <div className="text-right">
-                  <p className="font-semibold">{money(i.price_cents * i.qty)}</p>
+                  <p className="font-semibold">{formatPrice(i.price_cents * i.qty)}</p>
                   <button 
                     className="mt-1 text-sm text-red-500 hover:text-red-600"
                     onClick={() => remove(i.id)}
@@ -175,7 +176,7 @@ export default function CartPage() {
             <div className="mb-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span>{money(sub)}</span>
+                <span>{formatPrice(sub)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Delivery</span>
@@ -184,8 +185,9 @@ export default function CartPage() {
               <div className="my-2 border-t pt-2" />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
-                <span className="text-2xl">{money(sub)}</span>
+                <span className="text-2xl">{formatPrice(sub)}</span>
               </div>
+              <p className="text-xs text-gray-500 mt-2">All prices in Guyanese Dollars (GYD) - No cents used</p>
             </div>
             
             <button 
