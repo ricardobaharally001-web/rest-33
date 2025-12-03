@@ -10,12 +10,24 @@ export default function CartPage() {
   const sub = subtotal();
   const [settings, setSettings] = React.useState<any>({});
   const [customerName, setCustomerName] = React.useState("");
+  const [deliveryOption, setDeliveryOption] = React.useState<"delivery" | "pickup">("pickup");
   const [showAlert, setShowAlert] = React.useState(false);
   const [alertMessage, setAlertMessage] = React.useState("");
 
   React.useEffect(() => { 
     getSettings().then(setSettings); 
   }, []);
+
+  // Set default delivery option based on settings
+  React.useEffect(() => {
+    if (settings.delivery_available === true) {
+      // If delivery is available, default to pickup but allow selection
+      setDeliveryOption("pickup");
+    } else {
+      // If delivery is not available, force pickup only
+      setDeliveryOption("pickup");
+    }
+  }, [settings.delivery_available]);
 
   const showNotification = (message: string) => {
     setAlertMessage(message);
@@ -67,9 +79,11 @@ export default function CartPage() {
     }
 
     const lines = items.map(i => `• ${i.name} × ${i.qty} — ${formatPrice(i.price_cents * i.qty)}`);
+    const deliveryType = deliveryOption === "delivery" ? "Delivery" : "Pickup";
     const message = [
       `🛒 Order for ${settings?.business_name || "cook-shop"}`,
       `From: ${customerName}`,
+      `Type: ${deliveryType}`,
       `━━━━━━━━━━━━━━━`,
       ...lines,
       `━━━━━━━━━━━━━━━`,
@@ -180,18 +194,47 @@ export default function CartPage() {
                 required
               />
             </div>
+
+            {/* Delivery/Pickup Selection */}
+            <div className="mb-4">
+              <label className="label text-xs mb-2">ORDER TYPE</label>
+              {settings.delivery_available === true ? (
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryOption("delivery")}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                      deliveryOption === "delivery"
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    🚚 Delivery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryOption("pickup")}
+                    className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                      deliveryOption === "pickup"
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    }`}
+                  >
+                    📍 Pickup
+                  </button>
+                </div>
+              ) : (
+                <div className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-center">
+                  <span className="text-gray-700 dark:text-gray-300 font-medium">📍 Pickup Only</span>
+                </div>
+              )}
+            </div>
             
             <div className="mb-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
                 <span>{formatPrice(sub)}</span>
               </div>
-              {settings.delivery_available === true && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Delivery</span>
-                  <span className="text-green-600">Available</span>
-                </div>
-              )}
               <div className="my-2 border-t pt-2" />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total</span>
