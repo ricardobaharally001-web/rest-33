@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { supabase } from "./supabase";
 
 type AdminAuthState = {
@@ -10,6 +10,7 @@ type AdminAuthState = {
   changePassword: (currentPassword: string, newPassword: string) => Promise<boolean>;
   checkPassword: (password: string) => Promise<boolean>;
   hasPasswordInDatabase: () => Promise<boolean>;
+  initialize: () => Promise<void>;
 };
 
 export const useAdminAuth = create<AdminAuthState>()(
@@ -34,6 +35,15 @@ export const useAdminAuth = create<AdminAuthState>()(
       
       logout: () => {
         set({ isAuthenticated: false, loginTimestamp: null });
+      },
+      
+      // Initialize: clear authentication if password exists in database
+      initialize: async () => {
+        const hasPassword = await get().hasPasswordInDatabase();
+        if (hasPassword) {
+          // Clear any persisted authentication state
+          set({ isAuthenticated: false, loginTimestamp: null });
+        }
       },
       
       checkPassword: async (password: string) => {
@@ -101,7 +111,7 @@ export const useAdminAuth = create<AdminAuthState>()(
     }),
     { 
       name: "admin-auth",
-      skipHydration: true 
+      skipHydration: true
     }
   )
 );
