@@ -45,5 +45,6 @@ export async function getSettings() {
     whatsapp_number?: string;
     stock_display?: boolean;
     delivery_available?: boolean;
+    hero_description?: string;
   };
 }

@@ -15,7 +15,8 @@ export default function SettingsPage() {
     theme: "light", 
     whatsapp_number: "",
     stock_display: false,
-    delivery_available: false
+    delivery_available: false,
+    hero_description: ""
   });
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -165,6 +166,19 @@ export default function SettingsPage() {
             />
             <p className="text-xs text-gray-500 mt-1">
               Include country code without + or spaces (e.g., 15551234567 for US)
+            </p>
+          </div>
+          
+          <div>
+            <label className="label">Hero Description</label>
+            <input 
+              className="input" 
+              value={values.hero_description || ""} 
+              onChange={e => setValues({...values, hero_description: e.target.value})} 
+              placeholder="Discover amazing dishes, desserts, and drinks made with love"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This text appears under "Welcome to Cook Shop" on the homepage
             </p>
           </div>
           

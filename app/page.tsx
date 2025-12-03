@@ -62,7 +62,7 @@ export default function Storefront() {
               Welcome to <span className="text-yellow-300">Cook Shop</span>
             </h1>
             <p className="mb-8 text-lg opacity-95 md:text-xl">
-              Discover amazing dishes, desserts, and drinks made with love
+              {settings.hero_description || "Discover amazing dishes, desserts, and drinks made with love"}
             </p>
             <div className="relative mx-auto max-w-xl">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />

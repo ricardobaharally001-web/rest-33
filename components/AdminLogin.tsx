@@ -88,11 +88,6 @@ export default function AdminLogin() {
               {loading ? "Signing in..." : "Sign in to Admin"}
             </button>
           </div>
-          
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>Default password: <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">admin123</code></p>
-            <p className="mt-1">Change it in Settings after logging in</p>
-          </div>
         </form>
       </div>
     </div>
