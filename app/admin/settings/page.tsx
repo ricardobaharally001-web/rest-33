@@ -17,6 +17,7 @@ export default function SettingsPage() {
     stock_display: false,
     delivery_available: false
   });
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
@@ -72,26 +73,37 @@ export default function SettingsPage() {
     setPasswordLoading(true);
     setPasswordMessage("");
 
+    if (!currentPassword) {
+      setPasswordMessage("Please enter your current password");
+      setPasswordLoading(false);
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
-      setPasswordMessage("Passwords don't match");
+      setPasswordMessage("New passwords don't match");
       setPasswordLoading(false);
       return;
     }
 
     if (newPassword.length < 6) {
-      setPasswordMessage("Password must be at least 6 characters");
+      setPasswordMessage("New password must be at least 6 characters");
       setPasswordLoading(false);
       return;
     }
 
     try {
-      const success = await changePassword(newPassword);
+      const success = await changePassword(currentPassword, newPassword);
       if (success) {
-        setPasswordMessage("Password changed successfully!");
+        setPasswordMessage("Password changed successfully! Please log in again.");
+        setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        // Redirect to login after a short delay
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 2000);
       } else {
-        setPasswordMessage("Failed to change password");
+        setPasswordMessage("Current password is incorrect or failed to change password");
       }
     } catch (error) {
       setPasswordMessage("Error changing password");
@@ -198,7 +210,19 @@ export default function SettingsPage() {
           <h2 className="text-lg font-semibold mb-4">Security</h2>
           
           <div>
-            <label className="label">New Admin Password</label>
+            <label className="label">Current Password</label>
+            <input 
+              type="password"
+              className="input" 
+              value={currentPassword} 
+              onChange={e => setCurrentPassword(e.target.value)} 
+              placeholder="Enter current password"
+              disabled={passwordLoading}
+            />
+          </div>
+          
+          <div>
+            <label className="label">New Password</label>
             <input 
               type="password"
               className="input" 
@@ -234,7 +258,7 @@ export default function SettingsPage() {
           <button 
             type="submit" 
             className="btn btn-primary" 
-            disabled={passwordLoading || !newPassword || !confirmPassword}
+            disabled={passwordLoading || !currentPassword || !newPassword || !confirmPassword}
           >
             {passwordLoading ? "Changing..." : "Change Password"}
           </button>
