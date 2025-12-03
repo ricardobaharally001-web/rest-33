@@ -118,8 +118,16 @@ export default function CartPage() {
           <div className="space-y-4">
             {items.map(i => (
               <div key={i.id} className="card flex items-center gap-4 p-4">
-                <div className="h-20 w-20 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
-                  <Package className="h-full w-full p-5 text-gray-400" />
+                <div className="h-20 w-20 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 flex-shrink-0">
+                  {i.image_url && i.image_url !== '/placeholder.svg' ? (
+                    <img 
+                      src={i.image_url} 
+                      alt={i.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Package className="h-full w-full p-5 text-gray-400" />
+                  )}
                 </div>
                 
                 <div className="flex-1">

@@ -11,7 +11,7 @@ export default function ProductCard({ product }: { product: any }) {
 
   const handleAdd = () => {
     setIsAdding(true);
-    add({ id: product.id, name: product.name, price_cents: product.price_cents, qty: 1 });
+    add({ id: product.id, name: product.name, price_cents: product.price_cents, qty: 1, image_url: product.image_url });
     
     // Show toast notification
     const toast = document.createElement('div');
